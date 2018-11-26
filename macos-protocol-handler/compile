@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd -- "$(dirname -- "$0")"
+rm -rf app.app
+osacompile -o app.app app.applescript

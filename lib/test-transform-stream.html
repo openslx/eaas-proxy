@@ -1,0 +1,12 @@
+<!doctype html>
+<script type="module">
+    import TransformStream from "./transform-stream.js";
+
+    let i = 0;
+    self.a = new ReadableStream({
+        pull(c) {if (i > 3) c.close(); c.enqueue(i++);}
+    });
+    self.b = new TransformStream({
+        transform(ch, c) {c.enqueue(ch + 1);}
+    });
+</script>

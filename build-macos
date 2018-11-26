@@ -1,0 +1,65 @@
+#!/bin/sh
+set -eu
+
+# Copyright 2018 The Emulation-as-a-Service Authors.
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+TARGET="eaas-proxy.app"
+APP="eaas-proxy-macos-x64"
+TARGETAPP="eaas-proxy"
+PROTOCOL="web+eaas-proxy"
+NAME="EaaS Proxy"
+
+rm -rf "$TARGET"
+cp -r macos-protocol-handler/app.app "$TARGET"
+
+XML="$(sed 's/$/\\n/g' << EOF |
+<key>CFBundleIdentifier</key>
+<string>inavalid.$PROTOCOL</string>
+<key>CFBundleURLTypes</key>
+<array><dict>
+  <key>CFBundleTypeRole</key>
+  <string>Shell</string>
+  <key>CFBundleURLName</key>
+  <string>$PROTOCOL</string>
+  <key>CFBundleURLSchemes</key>
+  <array>
+    <string>$PROTOCOL</string>
+  </array>
+</dict></array>
+EOF
+tr -d '\n')"
+
+sed -i 's\<string>app</string>\<string>'"$NAME"'</string>\' "$TARGET"/Contents/Info.plist
+sed -i '/^<\/dict>/i'"$XML" "$TARGET"/Contents/Info.plist
+
+cat << 'EOF' > "$TARGET"/Contents/Resources/app
+#!/bin/bash
+
+cd -- "$(dirname -- "$0")"
+
+
+if test -z "$1"; then
+  exec "$(pwd)/app2"
+fi
+
+# This does not work
+# (see <https://stackoverflow.com/questions/29510815/how-to-pass-command-line-arguments-to-a-program-run-with-the-open-command>):
+# open -b "com.apple.Terminal" ./app2 --args "$@"
+
+dir="$(mktemp -d)"
+
+printf "#!/bin/sh\n" > "$dir"/app2
+printf "exec " >> "$dir"/app2
+printf "%q " "$(pwd)/app2" "$@" >> "$dir"/app2
+
+chmod +x "$dir"/app2
+open -b "com.apple.Terminal" "$dir"/app2
+EOF
+
+chmod +x "$TARGET"/Contents/Resources/app
+cp "$APP" "$TARGET"/"$TARGETAPP"
+ln -s ../../"$TARGETAPP" "$TARGET"/Contents/Resources/app2
+
+rm "$TARGET".zip || :
+zip -r "$TARGET".zip "$TARGET"

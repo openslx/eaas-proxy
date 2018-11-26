@@ -1,0 +1,9 @@
+<!doctype html>
+<h1>Registering service worker ...</h1>
+<a href="/" hidden="" id="doneLink">Now go to /</a>
+<script type="module">
+    navigator.serviceWorker.register(`../../sw.js?${Math.random()}`);
+    navigator.serviceWorker.onmessage = () => {
+        doneLink.hidden = false;
+    };
+</script>

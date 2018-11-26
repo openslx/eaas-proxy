@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+process.argv.splice(1, 1);
+(async () => {
+  const imporT = require("esm")(module);
+  await imporT("./node-shims.js");
+  await imporT(require("path").resolve(process.cwd(), process.argv[1]));
+})();

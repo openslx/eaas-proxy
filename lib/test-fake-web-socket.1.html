@@ -1,0 +1,51 @@
+<!doctype html>
+<script type="module">
+    import FakeWebSocket from "./fake-web-socket.js";
+    import * as a from "./fake-web-socket.js";
+    import * as b from "./install-proxy-methods.js";
+    self.a = a;
+    self.b = b;
+
+    const ws = new FakeWebSocket("wss:websocket.example");
+    ws.onopen = () => console.log("opened");
+    ws.send("test1");
+    ws.send("test2");
+
+    const writer = ws.writable.getWriter();
+    writer.write("aaa");
+    writer.write("bbbb");
+
+    const reader = ws.readable.getReader();
+    console.log(ws.bufferedAmount);
+
+    reader.read().then((d) => {
+        console.log(d.value);
+    });
+
+    let written = 0;
+
+    ws.onmessage = (ev) => {
+        console.log("got message", ev.data, ev.data.size, ev.data.byteLength);
+        if (ws.binaryType === "blob") {
+            console.log("changing to arraybuffer");
+            ws.binaryType = "arraybuffer";
+        }
+        console.log(new TextDecoder().decode(ev.data));
+        if (!written++) {
+            writer.write("cc");
+        }
+    }
+
+    self.ws = ws;
+    self.FakeWebSocket = FakeWebSocket;
+</script>
+<pre id="console">
+10
+got message [object Blob] 3 
+changing to arraybuffer
+test1
+got message [object ArrayBuffer]  4
+bbbb
+got message [object ArrayBuffer]  2
+cc
+</pre>

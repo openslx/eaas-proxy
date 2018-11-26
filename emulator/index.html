@@ -1,0 +1,24 @@
+<!doctype html>
+<script src="index.js" type="module"></script>
+<h1>Registering service worker ...</h1>
+<h1 hidden="" id="doneLink"><a href="/" target="_blank">Now go to /</a></h1>
+<script type="module">
+    (async () => {
+        navigator.serviceWorker.onmessage = () => {
+            doneLink.hidden = false;
+        };
+        const sw = await navigator.serviceWorker.register(`../../sw.js` /*?${Math.random()}`*/);
+        navigator.serviceWorker.controller.postMessage("");
+        sw.update();
+        await fetch("/");
+        doneLink.hidden = false;
+    })();
+</script>
+
+<button onclick="navigator.serviceWorker.register(`../../sw.js?${Math.random()}`);">Force SW update</button>
+<div id="screen">
+    <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+    <canvas style="display: none"></canvas>
+</div>
+
+<h2><a href="../ethernet-monitor/" target="_blank">Ethernet monitor</a></h2>

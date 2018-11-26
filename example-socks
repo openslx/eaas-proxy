@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# ./webnode eaas-proxy.js 8080 /tmp/switch1 e6:66:b9:ae:5e:23 192.168.5.10/24 socks5
+./webnode eaas-proxy.js 8080 /tmp/switch1 e6:66:b9:ae:5e:23 192.168.5.10/24 socks5:user:pass

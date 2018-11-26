@@ -1,0 +1,23 @@
+#!/bin/sh
+
+cd "$(dirname -- "$0")"
+
+if ! test -f eaas-dev.simg; then
+  singularity pull docker://eaas/eaas-dev
+fi
+
+EXEC="singularity exec eaas-dev.simg"
+
+KILL() {
+echo "$SWITCH"
+  kill "$SWITCH"
+  return 0
+}
+trap KILL INT TERM
+
+rm -rf /tmp/switch1
+tail -f /dev/null | $EXEC vde_switch -s /tmp/switch1 &
+SWITCH="$!"
+
+sleep 1
+$EXEC slirpvde -D -socket /tmp/switch1

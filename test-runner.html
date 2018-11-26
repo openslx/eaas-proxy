@@ -1,0 +1,52 @@
+<!doctype html>
+<script type="module">
+    // Copyright 2018 The Emulation-as-a-Service Authors.
+    // SPDX-License-Identifier: GPL-2.0-or-later
+
+    const run = src => {
+        function installProxy(target, name) {
+            target[name] = new Proxy(target[name], {
+                apply(target, thisArg, args) {
+                    // log.push([name, ...args]);
+                    log.push(args.join(" "));
+                    return Reflect.apply(target, thisArg, args);
+                }
+            });
+        }
+
+
+        function finish(window) {
+            let el = window.document.getElementById("console");
+            if (!el) el = window.document.body.appendChild(
+                window.document.createElement("pre"));
+            const expected = el.textContent.trim();
+            // const output = JSON.stringify(log, undefined, 2);
+            const output = log.join("\n");
+            if (expected === output) {
+                window.document.body.style.backgroundColor = "green";
+            } else {
+                window.document.body.style.backgroundColor = "red";
+                el.textContent += output;
+            }
+        }
+        const log = [];
+
+        const iframe = document.createElement("iframe");
+        iframe.src = src;
+        document.body.appendChild(iframe);
+        // iframe.contentWindow.console.log = () => { console.log("FF"); };
+
+        for (const name of ["debug", "error", "info", "log", "warn"]) {
+            installProxy(iframe.contentWindow.console, name);
+        }
+
+        //iframe.onload = () => console.log(new Error);
+        //console.log(iframe.contentWindow);
+        //iframe.contentWindow.onloadstart = () => console.log(new Error);
+        iframe.contentWindow.onload = () => finish(iframe.contentWindow);
+    };
+
+    run("./lib/test-event-handlers-mixin.html");
+    run("./lib/test-event-handlers-mixin.1.html");
+    run("./lib/test-fake-web-socket.html");
+</script>

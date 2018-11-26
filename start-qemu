@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd "$(dirname -- "$0")"
+
+if ! test -f eaas-dev.simg; then
+  singularity pull docker://eaas/eaas-dev
+fi
+
+singularity exec eaas-dev.simg qemu-system-x86_64 -net nic -net vde,sock=/tmp/switch1 -cdrom third_party/rootfs.iso

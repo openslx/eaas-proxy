@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export VDEPLUG="singularity exec eaas-dev.simg vde_plug"
+
+#./webnode eaas-proxy.js 8080 /tmp/switch1 e6:66:b9:ae:5e:23 10.0.2.50/24 10.0.2.2 80
+./webnode eaas-proxy.js 8080 /tmp/switch1 e6:66:b9:ae:5e:23 192.168.5.10/24 192.168.5.5 80

@@ -1,0 +1,16 @@
+<!doctype html>
+<script type="module">
+    import EventHandlersMixin from "./event-handlers-mixin.js";
+    class FakeWebSocket extends EventHandlersMixin(EventTarget, ["open", "error", "close", "message"]) {
+    }
+    const test = new FakeWebSocket();
+    test.addEventListener("open", () => console.log("called first"));
+    test.onopen = () => console.error(new Error("should never be called"));
+    test.addEventListener("open", () => console.log("called third"));
+    test.dispatchEvent(new MessageEvent("open"));
+</script>
+<pre id="console">
+called first
+onopen called
+called third
+</pre>
