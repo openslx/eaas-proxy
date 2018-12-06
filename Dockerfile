@@ -13,6 +13,7 @@ run \
   node_modules/.bin/pkg-fetch latest macos x64 && \
   :
 copy . .
+run git rev-parse HEAD
 run npm run build
 from ubuntu
 copy --from=0 /src/eaas-proxy.exe /src/eaas-proxy.app.zip /src/eaas-proxy /opt/eaas-proxy/
