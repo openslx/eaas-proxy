@@ -15,10 +15,12 @@ import {registerProtocol} from "./lib/register-protocol.js";
 import {registerProtocol as registerProtocolXDG} from "./lib/register-protocol-xdg.js";
 import opn from "opn";
 import {startEaas} from "./lib/node-eaas-client.js";
+import identify from "./lib/identify-git";
 
 const PROTOCOL = "web+eaas-proxy";
 
 (async () => {
+  console.log(`Version: ${await identify()}`);
   if (process.argv.length < 3) {
     if (process.platform === "win32") {
       await registerProtocol(PROTOCOL, process.argv[0]);
