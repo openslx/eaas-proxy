@@ -1,0 +1,15 @@
+image: docker
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+services:
+- docker:dind
+
+build:
+  script:
+  - docker build -t build .
+  - docker run --rm -v "$(pwd)":/out build cp -R /opt/eaas-proxy/. /out/eaas-proxy
+  artifacts:
+    paths:
+    - eaas-proxy/
