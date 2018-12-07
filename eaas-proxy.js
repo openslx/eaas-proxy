@@ -3,6 +3,7 @@
 
 import "./node-shims.js";
 import {NIC, parseMAC, cidrToSubnet} from "./webnetwork.js";
+import {StreamPrinter} from "./webnetwork.js";
 import net from "net";
 import TransformStream from "./lib/transform-stream.js";
 import WebSocket from "ws";
@@ -85,10 +86,12 @@ const PROTOCOL = "web+eaas-proxy";
   const nic = await new NIC;
   nic.addIPv4(internalIP, subnet);
   nic.readable
+    .pipeThrough(new StreamPrinter("OUT"))
     .pipeThrough(makeVDEGenerator())
     .pipeThrough(useWS ? makeWSStream(wsURLorSocketname)
       : vdePlugStream(wsURLorSocketname, VDEPLUG))
     .pipeThrough(new VDEParser())
+    .pipeThrough(new StreamPrinter("IN"))
     .pipeThrough(nic);
 
   if (useSOCKS5) {
