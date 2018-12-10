@@ -3,7 +3,7 @@
 	url = https://gitlab.com/emulation-as-a-service/eaas-client/
 [submodule "picotcp"]
 	path = picotcp.js
-	url = https://github.com/openslx/picotcp.js
+	url = https://gitlab.com/emulation-as-a-service/picotcp.js
 [submodule "emulator/v86"]
 	path = emulator/v86
 	url = https://github.com/copy/v86
