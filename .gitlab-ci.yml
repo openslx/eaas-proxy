@@ -21,7 +21,7 @@ pages:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
   - npm install
-  - npm run build
+  - npm run build || true
   - (cd emulator/v86; git apply ../v86-esm.patch; make)
   - rm -rf .git
   - mkdir public
