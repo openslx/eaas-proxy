@@ -4,6 +4,7 @@ from node:10
 run apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y gcc-multilib zip
 workdir /src
 copy package.json .
+copy package-lock.json .
 run npm install
 # Prefetch Node.js binaries used by pkg(-fetch).
 run \
