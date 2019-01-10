@@ -13,3 +13,20 @@ build:
   artifacts:
     paths:
     - eaas-proxy/
+
+pages:
+  stage: deploy
+  image: node
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script:
+  - npm install
+  - npm run build
+  - rm -rf .git
+  - mkdir public
+  - mv .* * public/. || true
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
