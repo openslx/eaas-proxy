@@ -1,6 +1,3 @@
-#!/bin/sh
-true /*; NODE_PATH="$(dirname -- "$0")/node_modules" exec node -e 'require("esm")(module)(require("path").resolve(process.cwd(), process.argv[1]))' "$0" "$@"; */;
-
 // Copyright 2018 The Emulation-as-a-Service Authors.
 // SPDX-License-Identifier: GPL-2.0-or-later
 
