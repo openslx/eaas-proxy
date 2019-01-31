@@ -30,7 +30,8 @@ global.crypto = {
 
 Object.assign(global, require("text-encoding"));
 
-global.Blob = class {};
+global.Blob = require("vblob").Blob;
+global.FileReader = require("vblob").FileReader;
 global.self = global;
 
 global.WebSocket = require("ws");

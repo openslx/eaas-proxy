@@ -1,8 +1,10 @@
+true /*; NODE_PATH="$(dirname -- "$0")/node_modules" exec node -e 'require("esm")(module)(require("path").resolve(process.cwd(), process.argv[1]))' "$0" "$@"; */;
+
 // Copyright 2018 The Emulation-as-a-Service Authors.
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import "./node-shims.js";
-import {NIC, parseMAC, cidrToSubnet} from "./webnetwork.js";
+import {NIC, parseMAC, cidrToSubnet, RecordStream, blobToArrayBuffer} from "./webnetwork.js";
 import net from "net";
 import TransformStream from "./lib/transform-stream.js";
 import WebSocket from "ws";
@@ -16,8 +18,12 @@ import {registerProtocol as registerProtocolXDG} from "./lib/register-protocol-x
 import opn from "opn";
 import {startEaas} from "./lib/node-eaas-client.js";
 import identify from "./lib/identify-git";
+import fs from "fs";
+const {writeFile} = fs.promises;
 
 const PROTOCOL = "web+eaas-proxy";
+
+const DEBUG_RECORD_TRAFFIC = false;
 
 (async () => {
   console.log(`Version: ${await identify()}`);
@@ -84,12 +90,27 @@ const PROTOCOL = "web+eaas-proxy";
 
   const nic = await new NIC;
   nic.addIPv4(internalIP, subnet);
-  nic.readable
-    .pipeThrough(makeVDEGenerator())
+
+  let sendStream, receiveStream;
+  if (DEBUG_RECORD_TRAFFIC) {
+    sendStream = new RecordStream();
+    receiveStream = new RecordStream();
+    receiveStream.recorder.data = sendStream.recorder.data;
+    process.on("SIGINT", async () => {
+      await writeFile("ethernet.pcap", new Uint8Array(await blobToArrayBuffer(sendStream.getDump())));
+      process.exit(0);
+    });
+  }
+  {
+    let chain = nic.readable;
+    if (DEBUG_RECORD_TRAFFIC) chain = chain.pipeThrough(sendStream);
+    chain = chain.pipeThrough(makeVDEGenerator())
     .pipeThrough(useWS ? makeWSStream(wsURLorSocketname)
       : vdePlugStream(wsURLorSocketname, VDEPLUG))
-    .pipeThrough(new VDEParser())
-    .pipeThrough(nic);
+    .pipeThrough(new VDEParser());
+    if (DEBUG_RECORD_TRAFFIC) chain = chain.pipeThrough(receiveStream);
+    chain = chain.pipeThrough(nic);
+  }
 
   if (useSOCKS5) {
     socks.createServer((info, accept, deny) => {

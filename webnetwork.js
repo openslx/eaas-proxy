@@ -73,6 +73,10 @@ export class RecordStream extends TransformStream {
     }
 }
 
+export const blobToArrayBuffer = blob => new Promise((onload, onerror) =>
+  Object.assign(new FileReader(), {onload, onerror}).readAsArrayBuffer(blob))
+.then(v => v.target.result);
+
 export function saveAs(blob, name) {
     const a = document.createElement("a");
     const url = URL.createObjectURL(blob);
