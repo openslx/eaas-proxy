@@ -23,7 +23,7 @@ const {writeFile} = fs.promises;
 
 const PROTOCOL = "web+eaas-proxy";
 
-const DEBUG_RECORD_TRAFFIC = false;
+const DEBUG_RECORD_TRAFFIC = !!process.env.DEBUG_RECORD_TRAFFIC;
 
 (async () => {
   console.log(`Version: ${await identify()}`);
