@@ -26,6 +26,7 @@ pages:
   - (cd emulator/v86; git apply ../v86-esm.patch; make)
   - rm -rf .git
   - mkdir public
+  - rm @@@ # HACK: Fix: pages:deploy - Symlink cannot be created targeting: .
   - mv .* * public/. || true
   artifacts:
     paths:
