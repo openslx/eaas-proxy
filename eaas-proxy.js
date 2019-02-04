@@ -23,7 +23,7 @@ const {writeFile} = fs.promises;
 
 const PROTOCOL = "web+eaas-proxy";
 
-const DEBUG_RECORD_TRAFFIC = !!process.env.DEBUG_RECORD_TRAFFIC;
+const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
 
 (async () => {
   console.log(`Version: ${await identify()}`);
@@ -94,10 +94,9 @@ const DEBUG_RECORD_TRAFFIC = !!process.env.DEBUG_RECORD_TRAFFIC;
   let sendStream, receiveStream;
   if (DEBUG_RECORD_TRAFFIC) {
     sendStream = new RecordStream();
-    receiveStream = new RecordStream();
-    receiveStream.recorder.data = sendStream.recorder.data;
+    receiveStream = new RecordStream(sendStream.recorder.data);
     process.on("SIGINT", async () => {
-      await writeFile("ethernet.pcap", new Uint8Array(await blobToArrayBuffer(sendStream.getDump())));
+      await writeFile(DEBUG_RECORD_TRAFFIC, new Uint8Array(await blobToArrayBuffer(sendStream.getDump())));
       process.exit(0);
     });
   }
