@@ -25,7 +25,8 @@ pages:
   - apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y default-jre
   - (cd emulator/v86; git apply ../v86-esm.patch; make)
   - rm -rf .git
-  - find -maxdepth 1 -lname . -delete # HACK: Fix: pages:deploy - Symlink cannot be created targeting: .
+  # HACK: Fix: pages:deploy - Symlink cannot be created targeting: .
+  - find -maxdepth 1 -lname . -exec sh -c 'rm "$0" && mkdir "$0" && cd "$0" && ln -s ../* .' '{}' ';'
   - mkdir public
   - mv .* * public/. || true
   artifacts:
