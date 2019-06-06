@@ -12,6 +12,10 @@ const MAC = parseMAC("ce:8e:83:74:40:2d");
 const nic = new NIC(undefined, MAC);
 (async () => {
     const useWS = !!await get("apiURL");
+    if (!useWS) {
+    const broadcast = broadcastStream("ethernet");
+    broadcast.readable.pipeThrough(await nic).pipeThrough(broadcast);
+    } else {
     self.localStorage = {};
     const client = new EaasClient(await get("apiURL"));
     client.networkId = await get("networkID");
@@ -19,10 +23,6 @@ const nic = new NIC(undefined, MAC);
 
     Object.assign(self, {EaasClient, client, wsURL});
 
-    if (!useWS) {
-    const broadcast = broadcastStream("ethernet");
-    broadcast.readable.pipeThrough(await nic).pipeThrough(broadcast);
-    } else {
       (await nic).readable.pipeThrough(makeVDEGenerator())
       .pipeThrough(makeWSStream(await wsURL))
       .pipeThrough(new VDEParser())
