@@ -8,7 +8,7 @@ importScripts("https://emulation-as-a-service.gitlab.io/eaas-proxy/lib/xhr.js");
 importScripts("https://cdn.jsdelivr.net/gh/rafaelgieschke/browser-es-module-loader@master/dist/babel-browser-build.js");
 importScripts("https://cdn.jsdelivr.net/gh/rafaelgieschke/browser-es-module-loader@master/dist/browser-es-module-loader.js");
 
-new BrowserESModuleLoader().import("http://emulation-as-a-service.gitlab.io/eaas-proxy/@@@/http-request/index.js");
+new BrowserESModuleLoader().import("https://emulation-as-a-service.gitlab.io/eaas-proxy/@@@/http-request/index.js");
 
 self.oninstall = () => {
   skipWaiting();
