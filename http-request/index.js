@@ -50,7 +50,9 @@ self.onfetch = ev => ev.waitUntil((async () => {
     const url = new URL(ev.request.url);
     if (url.origin !== self.origin) return;
     if (url.pathname.match(/^\/(%40%40%40|@@@)\//)) return;
-    const body = await requestHttp2(ev.request);
-    console.log("BODY", body);
-    ev.respondWith(new Response(body));
+    ev.respondWith((async () => {
+      const body = await requestHttp2(ev.request);
+      console.log("BODY", body);
+      return new Response(body);
+    })());
 })());
