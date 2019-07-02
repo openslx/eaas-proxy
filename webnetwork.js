@@ -125,6 +125,16 @@ export class NetworkStack {
 
 let defaultNetwork;
 
+const callAsync = async (emscriptenModule, executor) => {
+    let resolve;
+    const promise = new Promise(_resolve => resolve = _resolve);
+    const ptr = emscriptenModule.addFunction((...args) => resolve(args));
+    executor(ptr);
+    await promise;
+    emscriptenModule.removeFunction(resolve);
+    return promise;
+}
+
 export class NIC {
     constructor(stack, mac = randomMac()) {
         return (async () => {
@@ -141,13 +151,20 @@ export class NIC {
         this.stack._picotcp.ccall("js_add_ipv4", "number", ["number", "string", "string"], [this.dev, ip, netmask]);
     }
     async ping(dst, timeout = 1000) {
-        let resolve;
-        const promise = new Promise(_resolve => resolve = _resolve);
-        const ptr = this.stack._picotcp.addFunction(resolve);
-        this.stack._picotcp.ccall("pico_icmp4_ping", "number", ["string", "number", "number", "number", "number", "number"], [dst, 1, 1, timeout, 64, ptr]);
-        await promise;
-        this.stack._picotcp.removeFunction(resolve);
-        return promise;
+        return callAsync(this.stack._picotcp, ptr => this.stack._picotcp.ccall(
+            "pico_icmp4_ping", "number",
+            ["string", "number", "number", "number", "number", "number"],
+            [dst, 1, 1, timeout, 64, ptr]));
+    }
+    async startDHCPClient() {
+        const xidPtr = this.stack._picotcp._malloc(4);
+        const [cli, code] = await callAsync(this.stack._picotcp, ptr => this.stack._picotcp.ccall(
+            "pico_dhcp_initiate_negotiation", "number",
+            ["number", "number", "number"],
+            [this.dev, ptr, xidPtr]));
+        const xid = this.stack._picotcp.HEAPU32[xidPtr / 4];
+        this.stack._picotcp._free(xidPtr);
+        return [cli, code, xid];
     }
     get readable() {
         return this.stack._picotcp.pointers[this.dev].readable;
