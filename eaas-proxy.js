@@ -85,13 +85,13 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
     externalIPPortString.includes(":") ? externalIPPortString.split(/:/) : ["", externalIPPortString];
   const externalPort = parseInt(externalPortString);
   const MAC = parseMAC(MACString); // TODO: Actually use this MAC, use random MAC if missing/empty string
+  const useDHCP = internalIPCIDR === "dhcp";
   const [internalIP, subnet] = cidrToSubnet(internalIPCIDR);
   const targetPort = parseInt(targetPortString);
 
   const VDEPLUG = process.env.VDEPLUG && process.env.VDEPLUG.split(" ");
 
   const nic = await new NIC;
-  nic.addIPv4(internalIP, subnet);
 
   let sendStream, receiveStream;
   if (DEBUG_RECORD_TRAFFIC) {
@@ -112,6 +112,8 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
     if (DEBUG_RECORD_TRAFFIC) chain = chain.pipeThrough(receiveStream);
     chain = chain.pipeThrough(nic);
   }
+  if (useDHCP) await nic.startDHCPClient();
+  else nic.addIPv4(internalIP, subnet);
 
   if (useSOCKS5) {
     socks.createServer((info, accept, deny) => {
