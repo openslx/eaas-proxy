@@ -28,7 +28,9 @@ const nic = new NIC(undefined, MAC);
       .pipeThrough(new VDEParser())
       .pipeThrough(await nic);
     }
-    (await nic).addIPv4(await get("clientIP"));
+    const clientIP = await get("clientIP");
+    if (clientIP === "dhcp") await (await nic).startDHCPClient();
+    else (await nic).addIPv4(clientIP);
     for (const client of await clients.matchAll()) client.postMessage("");
 })();
 
