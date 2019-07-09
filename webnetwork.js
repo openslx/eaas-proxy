@@ -166,6 +166,25 @@ export class NIC {
         this.stack._picotcp._free(xidPtr);
         return [cli, code, xid];
     }
+    startDHCPServer(ip) {
+        const settingsPtr = this.stack._picotcp._malloc(9 * 4);
+        const HEAPU32 = this.stack._picotcp.HEAPU32.subarray(settingsPtr / 4);
+        HEAPU32[0] = 0
+        HEAPU32[1] = 0;
+        HEAPU32[2] = 0;
+        HEAPU32[3] = 0;
+        HEAPU32[4] = this.dev;
+        HEAPU32[5] = 0;
+        HEAPU32[6] = new Uint32Array(Uint8Array.from(
+            ip.split(/\./).map(v => parseInt(v, 10))).buffer)[0];
+        HEAPU32[7] = 0;
+        HEAPU32[8] = 0;
+        const ret = this.stack._picotcp.ccall(
+            "pico_dhcp_server_initiate", "number", ["number"], [settingsPtr]
+        );
+        this.stack._picotcp._free(settingsPtr);
+        return ret;
+    }
     get readable() {
         return this.stack._picotcp.pointers[this.dev].readable;
     }

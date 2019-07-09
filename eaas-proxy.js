@@ -115,7 +115,9 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
   if (useDHCP) await nic.startDHCPClient();
   else nic.addIPv4(internalIP, subnet);
 
-  if (useSOCKS5) {
+  if (targetIPOrSOSCKS === "dhcpd") {
+    console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
+  } else if (useSOCKS5) {
     socks.createServer((info, accept, deny) => {
       console.log(info);
       const c = accept(true);
