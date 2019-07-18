@@ -125,13 +125,13 @@ export class NetworkStack {
 
 let defaultNetwork;
 
-const callAsync = async (emscriptenModule, executor) => {
+const callAsync = async (emscriptenModule, executor, removeFunction = true) => {
     let resolve;
     const promise = new Promise(_resolve => resolve = _resolve);
     const ptr = emscriptenModule.addFunction((...args) => resolve(args));
     executor(ptr);
     await promise;
-    emscriptenModule.removeFunction(resolve);
+    if (removeFunction) emscriptenModule.removeFunction(resolve);
     return promise;
 }
 
@@ -161,7 +161,7 @@ export class NIC {
         const [cli, code] = await callAsync(this.stack._picotcp, ptr => this.stack._picotcp.ccall(
             "pico_dhcp_initiate_negotiation", "number",
             ["number", "number", "number"],
-            [this.dev, ptr, xidPtr]));
+            [this.dev, ptr, xidPtr]), false);
         const xid = this.stack._picotcp.HEAPU32[xidPtr / 4];
         this.stack._picotcp._free(xidPtr);
         return [cli, code, xid];
