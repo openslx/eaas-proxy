@@ -163,7 +163,8 @@ export class NIC {
             ["number", "number", "number"],
             [this.dev, ptr, xidPtr]), false);
         const xid = this.stack._picotcp.HEAPU32[xidPtr / 4];
-        this.stack._picotcp._free(xidPtr);
+        // Do not free xidPtr as picoTCP will use it again when
+        // renewing the DHCP lease (not documented in picoTCP documentation).
         return [cli, code, xid];
     }
     startDHCPServer(ip) {
