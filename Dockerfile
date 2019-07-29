@@ -14,6 +14,8 @@ run \
   node_modules/.bin/pkg-fetch latest macos x64 && \
   :
 copy . .
+# TODO: Move steps from package.json/prepublish to correct section.
+run npm install --unsafe-perm
 run git rev-parse HEAD
 run npm run build
 from ubuntu
