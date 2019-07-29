@@ -10,7 +10,9 @@ import {VDEParser, makeVDEGenerator} from "../lib/vde-parser.js";
 
 const MAC = parseMAC("ce:8e:83:74:40:2d");
 const nic = new NIC(undefined, MAC);
+let catchAll;
 (async () => {
+    catchAll = await get("catchAll");
     const useWS = !!await get("apiURL");
     if (!useWS) {
     const broadcast = broadcastStream("ethernet");
@@ -56,6 +58,7 @@ self.requestHttp2 = async ({url}) => {
     const s = new (await nic).TCPSocket(await get("serverIP"), await get("serverPort"));
     console.log(s);
     const w = s.writable.getWriter();
+    // TODO: Allow other paths!
     url = url.replace(/\/example-exhibit\//, "/");
     w.write(new TextEncoder().encode(`GET ${url}\n`));
     // w.write(new TextEncoder().encode(`GET ${url} HTTP/1.0\r\n\r\n`));
@@ -70,7 +73,7 @@ self.requestHttp2 = async ({url}) => {
 self.onfetch = ev => ev.waitUntil((async () => {
     console.log(ev.request);
     const url = new URL(ev.request.url);
-    if (url.origin !== self.origin) return;
+    if (!catchAll && url.origin !== self.origin) return;
     if (url.pathname.match(/^\/(%40%40%40|@@@)\//)) return;
     ev.respondWith((async () => {
       const body = await requestHttp2(ev.request);
