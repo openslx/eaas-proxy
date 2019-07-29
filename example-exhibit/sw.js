@@ -1,0 +1,1 @@
+importScripts("/@@@/eaas-sw.js");
