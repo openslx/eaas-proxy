@@ -49,8 +49,6 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
   if (params[0].match(/https?:/)) {
     params[0] = await (await startEaas(params[0])).getProxyURL();
   }
-  // HACK: Get rid of `window` for Emscripten to work properly.
-  delete global.window;
 
   if (params[0].startsWith(`${PROTOCOL}:`)) {
     const query = decodeURIComponent(new URL(params[0]).search.slice(1));
@@ -59,6 +57,15 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
       if (v) params[i] = v;
     }
   }
+
+  if (params[1].match(/^https?:\/\//)) {
+    const url = await (await startEaas(params[1])).wsConnection();
+    // Security: wsConnection() MUST not return a socket path!
+    if (!url.match(/^wss?:\/\//)) throw new RangeError(url);
+    params[1] = url;
+  }
+  // HACK: Get rid of `window` for Emscripten to work properly.
+  delete global.window;
 
   const [
     externalIPPortString,
