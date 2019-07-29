@@ -61,7 +61,7 @@ self.requestHttp2 = async ({url}) => {
     // TODO: Allow other paths!
     url = url.replace(/\/example-exhibit\//, "/");
     const url2 = new URL(url);
-    w.write(new TextEncoder().encode(`GET ${url2.pathname}\n`));
+    w.write(new TextEncoder().encode(`GET ${url2.pathname}\r\n`));
     // w.write(new TextEncoder().encode(`GET ${url} HTTP/1.0\r\n\r\n`));
     w.close();
     return s.readable;
