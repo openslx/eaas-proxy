@@ -99,6 +99,8 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
   const VDEPLUG = process.env.VDEPLUG && process.env.VDEPLUG.split(" ");
 
   const nic = await new NIC;
+  console.log("eaas-proxy's MAC address:",
+    Array.from(nic.mac, v=>v.toString(16).padStart(2, 0)).join(":"));
 
   let sendStream, receiveStream;
   if (DEBUG_RECORD_TRAFFIC) {

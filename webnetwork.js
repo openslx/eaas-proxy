@@ -144,6 +144,7 @@ export class NIC {
             }
             this.stack = stack;
             this.dev = this.stack._picotcp.ccall("pico_js_create", "number", ["string", "array"], ["", mac]);
+            this.mac = mac;
             return this;
         })();
     }
