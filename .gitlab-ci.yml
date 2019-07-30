@@ -20,7 +20,7 @@ pages:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
-  - npm install
+  - npm install --unsafe-perm
   - npm run build || true
   - apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y default-jre
   - (cd emulator/v86; git apply ../v86-esm.patch; make)
