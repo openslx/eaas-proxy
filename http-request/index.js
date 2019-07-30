@@ -84,6 +84,8 @@ self.onfetch = ev => ev.waitUntil((async () => {
     ev.respondWith((async () => {
       const body = await requestHttp2(ev.request);
       console.log("BODY", body);
-      return new Response(body);
+      return new Response(body, {headers: {
+        "content-security-policy": "upgrade-insecure-requests",
+      }});
     })());
 })());
