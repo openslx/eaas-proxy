@@ -59,8 +59,13 @@ self.requestHttp2 = async ({url}) => {
     console.log(s);
     const w = s.writable.getWriter();
     // TODO: Allow other paths!
-    url = url.replace(/\/example-exhibit\//, "/");
     const url2 = new URL(url);
+    let path = await get("path") || "";
+    path = `/${path.replace(/^\/|\/$/g, "")}/`;
+    if (url2.pathname.startsWith(path)) {
+        url2.pathname = url2.pathname.replace(path, "/");
+    }
+    console.log(url2);
     w.write(new TextEncoder().encode(`GET ${url2.pathname}\r\n`));
     // w.write(new TextEncoder().encode(`GET ${url} HTTP/1.0\r\n\r\n`));
     w.close();

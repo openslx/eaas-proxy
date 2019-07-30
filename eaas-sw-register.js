@@ -2,6 +2,7 @@ import {get, set} from "./lib/idb-keyval.js";
 export default async ({
     path, clientIP, serverIP, serverPort, apiURL, networkID, catchAll = false,
 }) => {
+    set("path", path);
     set("clientIP", clientIP);
     set("serverIP", serverIP);
     set("serverPort", serverPort);
