@@ -66,7 +66,7 @@ self.requestHttp2 = async ({url}) => {
         url2.pathname = url2.pathname.replace(path, "/");
     }
     console.log(url2);
-    w.write(new TextEncoder().encode(`GET ${url2.pathname}\r\n`));
+    w.write(new TextEncoder().encode(`GET ${url2.pathname}${url2.search}\r\n`));
     // w.write(new TextEncoder().encode(`GET ${url} HTTP/1.0\r\n\r\n`));
     w.close();
     return s.readable;
