@@ -8,7 +8,6 @@ copy package-lock.json .
 run npm install
 # Prefetch Node.js binaries used by pkg(-fetch).
 run \
-  node_modules/.bin/pkg-fetch latest linux x86 && \
   node_modules/.bin/pkg-fetch latest linux x64 && \
   node_modules/.bin/pkg-fetch latest win x86 && \
   node_modules/.bin/pkg-fetch latest macos x64 && \

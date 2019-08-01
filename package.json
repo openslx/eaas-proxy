@@ -17,21 +17,21 @@
   },
   "devDependencies": {
     "node-es-module-loader": "^0.3.8",
-    "pkg": "^4.3.5",
-    "rollup": "^0.67.4"
+    "pkg": "^4.4.0",
+    "rollup": "^1.18.0"
   },
   "scripts": {
     "prepublish": "cp picotcp.js/picotcp.wasm .; echo 'export default EaasClient.Client;' | cat eaas-client/eaas-client.js - > eaas-client/eaas-client.esm.js",
-    "build": "printf 'export default \"eaas-proxy-git-%s\";\\n' \"$(git rev-parse HEAD)\" > COMMIT.js; rollup -f cjs eaas-proxy.js -o eaas-proxy.dist.js && pkg . && mv eaas-proxy-win-x86.exe eaas-proxy.exe && ./build-macos && mv eaas-proxy-linux-x64 eaas-proxy"
+    "build": "printf 'export default \"eaas-proxy-git-%s\";\\n' \"$(git rev-parse HEAD)\" > COMMIT.js; rollup --inlineDynamicImports -f cjs eaas-proxy.js -o eaas-proxy.dist.js && pkg --public --no-bytecode . && mv eaas-proxy-win-x86.exe eaas-proxy.exe && ./build-macos && mv eaas-proxy-linux-x64 eaas-proxy"
   },
   "pkg": {
     "assets": [
       "picotcp.wasm"
     ],
     "targets": [
-      "latest-win-x86",
+      "latest-linux-x64",
       "latest-macos-x64",
-      "latest-linux-x64"
+      "latest-win-x86"
     ]
   },
   "bin": "eaas-proxy.dist.js"
