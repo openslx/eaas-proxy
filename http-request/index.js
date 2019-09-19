@@ -21,7 +21,9 @@ let catchAll;
     self.localStorage = {};
     const client = new EaasClient(await get("apiURL"));
     client.networkId = await get("networkID");
-    const wsURL = client.wsConnection();
+    // const wsURL = client.wsConnection();
+    // HACK: Using eaas-server API directly
+    const wsURL = (await (await fetch(`${await get("apiURL")}/networks/${await get("networkID")}/wsConnection`)).json()).wsConnection.replace(/^ws:\/\//, "wss://");
 
     Object.assign(self, {EaasClient, client, wsURL});
 
