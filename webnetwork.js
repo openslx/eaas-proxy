@@ -187,6 +187,18 @@ export class NIC {
         this.stack._picotcp._free(settingsPtr);
         return ret;
     }
+    async getAddr(addr) {
+        // TODO: This leaks `ptr` if `pico_dns_client_getaddr() != 0`.
+        const ipPtr = await callAsync(this.stack._picotcp, ptr =>
+            this.stack._picotcp.ccall("pico_dns_client_getaddr", "number",
+                ["string", "number", "number"], [addr, ptr, 0]));
+        const { HEAPU8 } = this.stack._picotcp;
+        // HACK: IP addresses will never be longer than 255 bytes.
+        const name = new TextDecoder().decode(
+            HEAPU8.subarray(ipPtr, ipPtr + 256)).split("\0")[0];
+        this.stack._picotcp._free(ipPtr);
+        return name;
+    }
     get readable() {
         return this.stack._picotcp.pointers[this.dev].readable;
     }
