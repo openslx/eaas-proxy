@@ -131,7 +131,7 @@ const callAsync = async (emscriptenModule, executor, removeFunction = true, tran
     const ptr = emscriptenModule.addFunction((...args) => resolve(transform(...args)));
     executor(ptr);
     await promise;
-    if (removeFunction) emscriptenModule.removeFunction(resolve);
+    if (removeFunction) emscriptenModule.removeFunction(ptr);
     return promise;
 }
 
