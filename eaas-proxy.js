@@ -1,4 +1,4 @@
-true /*; NODE_PATH="$(dirname -- "$0")/node_modules" exec node -e \
+true /*; NODE_PATH="$(dirname -- "$(readlink -f -- "$0")")/node_modules" exec node -e \
   'require("esm")(module)(require("path").resolve(process.cwd(),
   process.argv[1]))' "$0" "$@"; */;
 
