@@ -127,8 +127,14 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
   if (targetIPOrSOSCKS === "dhcpd") {
     console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
   } else if (useSOCKS5) {
-    socks.createServer((info, accept, deny) => {
+    socks.createServer(async (info, accept, deny) => {
       console.log(info);
+      let {dstAddr} = info;
+      if (!(dstAddr.match(/^\d{1,3}(\.\d{1,3}){3}$/) || dstAddr.match(/:/))) {
+        const ip = await nic.getAddr(dstAddr);
+        console.log(dstAddr, "->", ip);
+        dstAddr = ip;
+      }
       const c = accept(true);
       const socket1 = {
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),

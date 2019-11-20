@@ -125,10 +125,10 @@ export class NetworkStack {
 
 let defaultNetwork;
 
-const callAsync = async (emscriptenModule, executor, removeFunction = true) => {
+const callAsync = async (emscriptenModule, executor, removeFunction = true, transform = (...args) => args) => {
     let resolve;
     const promise = new Promise(_resolve => resolve = _resolve);
-    const ptr = emscriptenModule.addFunction((...args) => resolve(args));
+    const ptr = emscriptenModule.addFunction((...args) => resolve(transform(...args)));
     executor(ptr);
     await promise;
     if (removeFunction) emscriptenModule.removeFunction(resolve);
@@ -190,14 +190,13 @@ export class NIC {
     }
     async getAddr(addr) {
         // TODO: This leaks `ptr` if `pico_dns_client_getaddr() != 0`.
-        const ipPtr = await callAsync(this.stack._picotcp, ptr =>
-            this.stack._picotcp.ccall("pico_dns_client_getaddr", "number",
-                ["string", "number", "number"], [addr, ptr, 0]));
-        const { HEAPU8 } = this.stack._picotcp;
+        const {HEAPU8} = this.stack._picotcp;
         // HACK: IP addresses will never be longer than 255 bytes.
-        const name = new TextDecoder().decode(
-            HEAPU8.subarray(ipPtr, ipPtr + 256)).split("\0")[0];
-        this.stack._picotcp._free(ipPtr);
+        const name = await callAsync(this.stack._picotcp, ptr =>
+            this.stack._picotcp.ccall("pico_dns_client_getaddr", "number",
+                ["string", "number", "number"], [addr, ptr, 0]), true,
+                ipPtr => new TextDecoder().decode(
+                    HEAPU8.subarray(ipPtr, ipPtr + 256)).split("\0")[0]);
         return name;
     }
     get readable() {
