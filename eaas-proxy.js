@@ -140,7 +140,7 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
         writable: wrapWritable(c),
       }
-      const socket2 = new nic.TCPSocket(info.dstAddr, info.dstPort);
+      const socket2 = new nic.TCPSocket(dstAddr, info.dstPort);
       socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
     }).useAuth(username ?
       socks.auth.UserPassword((_username, _password, accept) =>
