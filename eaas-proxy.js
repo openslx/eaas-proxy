@@ -25,7 +25,10 @@ const {writeFile} = fs.promises;
 
 const PROTOCOL = "web+eaas-proxy";
 
-const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
+const {
+  DEBUG_RECORD_TRAFFIC,
+  EAAS_PROXY_READY_PATH,
+} = process.env;
 
 (async () => {
   console.log(`Version: ${await identify()}`);
@@ -124,8 +127,13 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
   if (useDHCP) await nic.startDHCPClient();
   else nic.addIPv4(internalIP, subnet);
 
+  const ready = async () => {
+    if (EAAS_PROXY_READY_PATH) await writeFile(EAAS_PROXY_READY_PATH, "");
+  };
+
   if (targetIPOrSOSCKS === "dhcpd") {
     console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
+    ready();
   } else if (useSOCKS5) {
     socks.createServer(async (info, accept, deny) => {
       console.log(info);
@@ -145,7 +153,7 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
     }).useAuth(username ?
       socks.auth.UserPassword((_username, _password, accept) =>
         accept(_username === username && _password === password)) :
-      socks.auth.None()).listen(externalPort);
+      socks.auth.None()).listen(externalPort, ready);
   } else {
     net.createServer(async (c) => {
       const socket1 = {
@@ -154,6 +162,6 @@ const DEBUG_RECORD_TRAFFIC = process.env.DEBUG_RECORD_TRAFFIC;
       };
       const socket2 = new nic.TCPSocket(targetIPOrSOSCKS, targetPort);
       socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
-    }).listen(externalPort, ...(externalIP ? [externalIP] : []));
+    }).listen(externalPort, ...(externalIP ? [externalIP] : []), ready);
   }
 })().catch(console.log);

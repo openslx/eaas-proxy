@@ -8,3 +8,8 @@ https://gitlab.com/emulation-as-a-service/eaas-proxy/-/jobs/artifacts/master/raw
 https://gitlab.com/emulation-as-a-service/eaas-proxy/-/jobs/artifacts/master/raw/eaas-proxy/eaas-proxy.app.zip?job=build
 
 https://gitlab.com/emulation-as-a-service/eaas-proxy/-/jobs/artifacts/master/raw/eaas-proxy/eaas-proxy.exe?job=build
+
+
+## Examples:
+
+./eaas-proxy.js 127.0.0.1:8080 /tmp/switch "" dhcp socks5
