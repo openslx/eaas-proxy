@@ -30,6 +30,15 @@ const {
   EAAS_PROXY_READY_PATH,
 } = process.env;
 
+const resolveName = async (dstAddr, nic) => {
+  if (!(dstAddr.match(/^\d{1,3}(\.\d{1,3}){3}$/) || dstAddr.match(/:/))) {
+    const ip = await nic.getAddr(dstAddr);
+    console.log(dstAddr, "->", ip);
+    dstAddr = ip;
+  }
+  return dstAddr;
+};
+
 (async () => {
   console.log(`Version: ${await identify()}`);
   if (process.argv.length < 3) {
@@ -137,18 +146,13 @@ const {
   } else if (useSOCKS5) {
     socks.createServer(async (info, accept, deny) => {
       console.log(info);
-      let {dstAddr} = info;
-      if (!(dstAddr.match(/^\d{1,3}(\.\d{1,3}){3}$/) || dstAddr.match(/:/))) {
-        const ip = await nic.getAddr(dstAddr);
-        console.log(dstAddr, "->", ip);
-        dstAddr = ip;
-      }
+      const dstIP = resolveName(info.dstAddr, nic);
       const c = accept(true);
       const socket1 = {
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
         writable: wrapWritable(c),
       }
-      const socket2 = new nic.TCPSocket(dstAddr, info.dstPort);
+      const socket2 = new nic.TCPSocket(dstIP, info.dstPort);
       socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
     }).useAuth(username ?
       socks.auth.UserPassword((_username, _password, accept) =>
@@ -160,7 +164,8 @@ const {
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
         writable: wrapWritable(c),
       };
-      const socket2 = new nic.TCPSocket(targetIPOrSOSCKS, targetPort);
+      const dstIP = resolveName(targetIPOrSOSCKS, nic);
+      const socket2 = new nic.TCPSocket(dstIP, targetPort);
       socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
     }).listen(externalPort, ...(externalIP ? [externalIP] : []), ready);
   }
