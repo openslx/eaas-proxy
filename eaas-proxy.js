@@ -146,7 +146,7 @@ const resolveName = async (dstAddr, nic) => {
   } else if (useSOCKS5) {
     socks.createServer(async (info, accept, deny) => {
       console.log(info);
-      const dstIP = resolveName(info.dstAddr, nic);
+      const dstIP = await resolveName(info.dstAddr, nic);
       const c = accept(true);
       const socket1 = {
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
@@ -164,7 +164,7 @@ const resolveName = async (dstAddr, nic) => {
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
         writable: wrapWritable(c),
       };
-      const dstIP = resolveName(targetIPOrSOSCKS, nic);
+      const dstIP = await resolveName(targetIPOrSOSCKS, nic);
       const socket2 = new nic.TCPSocket(dstIP, targetPort);
       socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
     }).listen(externalPort, ...(externalIP ? [externalIP] : []), ready);
