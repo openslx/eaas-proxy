@@ -147,6 +147,8 @@ const resolveName = async (dstAddr, nic) => {
     socks.createServer(async (info, accept, deny) => {
       console.log(info);
       const dstIP = await resolveName(info.dstAddr, nic);
+      // Fail if address could not be resolved by DNS
+      if (!dstIP) return deny();
       const c = accept(true);
       const socket1 = {
         readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
@@ -165,6 +167,12 @@ const resolveName = async (dstAddr, nic) => {
         writable: wrapWritable(c),
       };
       const dstIP = await resolveName(targetIPOrSOSCKS, nic);
+      // Fail if address could not be resolved by DNS
+      if (!dstIP) {
+        socket1.readable.cancel();
+        socket1.writable.abort();
+        return;
+      }
       const socket2 = new nic.TCPSocket(dstIP, targetPort);
       socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
     }).listen(externalPort, ...(externalIP ? [externalIP] : []), ready);
