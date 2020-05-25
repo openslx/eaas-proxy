@@ -148,6 +148,9 @@ const resolveName = async (dstAddr, nic) => {
       console.log(info);
       const dstIP = await resolveName(info.dstAddr, nic);
       // Fail if address could not be resolved by DNS
+      // HACK: `deny()` sends the wrong SOCKS5 reply
+      // (and Wireshark is not happy about the general structure of the reply),
+      // it might be smarter to `accept(true)` and directly close the socket?
       if (!dstIP) return deny();
       const c = accept(true);
       const socket1 = {
@@ -168,6 +171,7 @@ const resolveName = async (dstAddr, nic) => {
       };
       const dstIP = await resolveName(targetIPOrSOSCKS, nic);
       // Fail if address could not be resolved by DNS
+      // TODO: Test this
       if (!dstIP) {
         socket1.readable.cancel();
         socket1.writable.abort();
