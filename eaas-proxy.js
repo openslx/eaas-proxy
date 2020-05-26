@@ -171,10 +171,13 @@ const resolveName = async (dstAddr, nic) => {
       };
       const dstIP = await resolveName(targetIPOrSOSCKS, nic);
       // Fail if address could not be resolved by DNS
-      // TODO: Test this
       if (!dstIP) {
-        socket1.readable.cancel();
-        socket1.writable.abort();
+        try {
+          socket1.readable.cancel();
+        } catch {}
+        try {
+          socket1.writable.abort();
+        } catch {}
         return;
       }
       const socket2 = new nic.TCPSocket(dstIP, targetPort);
