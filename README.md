@@ -1,3 +1,9 @@
+## Install on CLI:
+
+`
+curl -fL https://gitlab.com/emulation-as-a-service/eaas-proxy/-/jobs/artifacts/master/raw/eaas-proxy/eaas-proxy?job=build | install -D /dev/stdin /opt/bin/eaas-proxy
+`
+
 
 ## Pre-built binaries:
 
