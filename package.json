@@ -21,7 +21,7 @@
     "rollup": "^0.67.4"
   },
   "scripts": {
-    "prepublish": "cp picotcp.js/picotcp.wasm .; echo 'export default EaasClient.Client;' | cat eaas-client/eaas-client.js - > eaas-client/eaas-client.esm.js",
+    "prepublish": "cp picotcp.js/picotcp.wasm .",
     "build": "printf 'export default \"eaas-proxy-git-%s\";\\n' \"$(git rev-parse HEAD)\" > COMMIT.js; rollup -f cjs eaas-proxy.js -o eaas-proxy.dist.js && pkg . && mv eaas-proxy-win-x86.exe eaas-proxy.exe && ./build-macos && mv eaas-proxy-linux-x64 eaas-proxy"
   },
   "pkg": {
@@ -34,5 +34,6 @@
       "latest-linux-x64"
     ]
   },
-  "bin": "eaas-proxy.dist.js"
+  "bin": "eaas-proxy.dist.js",
+  "type": "module"
 }

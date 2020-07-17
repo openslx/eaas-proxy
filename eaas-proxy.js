@@ -1,6 +1,4 @@
-true /*; NODE_PATH="$(dirname -- "$(readlink -f -- "$0")")/node_modules" exec node -e \
-  'require("esm")(module)(require("path").resolve(process.cwd(),
-  process.argv[1]))' "$0" "$@"; */;
+#!/usr/bin/env node
 
 // Copyright 2018 The Emulation-as-a-Service Authors.
 // SPDX-License-Identifier: GPL-2.0-or-later
@@ -19,7 +17,7 @@ import {registerProtocol} from "./lib/register-protocol.js";
 import {registerProtocol as registerProtocolXDG} from "./lib/register-protocol-xdg.js";
 import opn from "opn";
 import {startEaas} from "./lib/node-eaas-client.js";
-import identify from "./lib/identify-git";
+import identify from "./lib/identify-git.js";
 import fs from "fs";
 const {writeFile} = fs.promises;
 

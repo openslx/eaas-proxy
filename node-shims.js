@@ -17,21 +17,25 @@ setInterval = new Proxy(setInterval, {
   },
 });
 
-const streams = require("web-streams-polyfill");
+import streams from "web-streams-polyfill";
 global.ReadableStream = streams.ReadableStream;
 global.WritableStream = streams.WritableStream;
 
 // global.crypto = new (require("node-webcrypto-ossl"));
+import {randomFillSync} from "crypto";
 global.crypto = {
   getRandomValues(buffer) {
-    return require("crypto").randomFillSync(buffer);
+    return randomFillSync(buffer);
   }
 };
 
-Object.assign(global, require("text-encoding"));
+import textEncoding from "text-encoding";
+Object.assign(global, textEncoding);
 
-global.Blob = require("vblob").Blob;
-global.FileReader = require("vblob").FileReader;
+import vblob from "vblob";
+global.Blob = vblob.Blob;
+global.FileReader = vblob.FileReader;
 global.self = global;
 
-global.WebSocket = require("ws");
+import WebSocket from "ws";
+global.WebSocket = WebSocket;
