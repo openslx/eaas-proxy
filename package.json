@@ -3,12 +3,12 @@
   "version": "",
   "dependencies": {
     "@heroku/socksv5": "0.0.9",
-    "esm": "^3.0.84",
+    "eventsource": "^1.0.7",
     "fs-extra": "^7.0.1",
-    "jquery": "^3.3.1",
-    "jsdom": "^13.0.0",
-    "node-fetch": "^2.3.0",
-    "opn": "^5.4.0",
+    "jquery": "^3.5.1",
+    "jsdom": "^13.2.0",
+    "node-fetch": "^2.6.0",
+    "opn": "^5.5.0",
     "text-encoding": "git+https://github.com/inexorabletash/text-encoding.git",
     "vblob": "^1.0.2",
     "web-streams-polyfill": "^1.3.2",
@@ -16,9 +16,8 @@
     "ws": "^5.2.2"
   },
   "devDependencies": {
-    "node-es-module-loader": "^0.3.8",
-    "pkg": "^4.3.5",
-    "rollup": "^0.67.4"
+    "pkg": "^4.4.9",
+    "rollup": "^2.21.0"
   },
   "scripts": {
     "prepublish": "cp picotcp.js/picotcp.wasm .",
