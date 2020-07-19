@@ -39,3 +39,9 @@ global.self = global;
 
 import WebSocket from "ws";
 global.WebSocket = WebSocket;
+
+globalThis.atob = globalThis.atob ?? ((string) => Buffer.from(string, "base64").toString("binary"));
+globalThis.btoa = globalThis.btoa ?? ((string) => Buffer.from(string, "binary").toString("base64"));
+
+import fetch from "node-fetch";
+globalThis.fetch = fetch;
