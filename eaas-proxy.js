@@ -44,31 +44,38 @@ const resolveName = async (dstAddr, nic) => {
   let params = paramsOrig;
 
   try {
-    const {
-        issuer,
-        client_id,
-        username,
-        password,
-        eaasBackendURL,
-        networkId,
-        networkName,
-        networkLabel,
-        localIP,
-        localPort,
-    } = JSON.parse(await readFile("./eaas-proxy.json"));
-    const proxyURL = await connectToNetwork({
-        issuer,
-        client_id,
-        username,
-        password,
-        eaasBackendURL,
-        networkId,
-        networkName,
-        networkLabel,
-        localIP,
-        localPort,
-    });
-    params[0] = proxyURL;
+      const {
+          issuer,
+          client_id,
+          username,
+          password,
+          eaasBackendURL,
+          networkId,
+          networkName,
+          networkLabel,
+          localIP,
+          localPort,
+      } = JSON.parse(await readFile("./eaas-proxy.json"));
+      try {
+          const proxyURL = await connectToNetwork({
+              issuer,
+              client_id,
+              username,
+              password,
+              eaasBackendURL,
+              networkId,
+              networkName,
+              networkLabel,
+              localIP,
+              localPort,
+          });
+          params[0] = proxyURL;
+      } catch (e) {
+          console.error(e);
+          // HACK: eaas-client will still have active event listeners and prevent exit
+          process.exit(1);
+          return;
+      }
   } catch {}
 
   if (params.length === 0) {
