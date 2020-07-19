@@ -16,10 +16,10 @@ import socks from "@heroku/socksv5";
 import {registerProtocol} from "./lib/register-protocol.js";
 import {registerProtocol as registerProtocolXDG} from "./lib/register-protocol-xdg.js";
 import opn from "opn";
-import {startEaas} from "./lib/node-eaas-client.js";
+import {startEaas, connectToNetwork} from "./lib/node-eaas-client.js";
 import identify from "./lib/identify-git.js";
 import fs from "fs";
-const {writeFile} = fs.promises;
+const {writeFile, readFile} = fs.promises;
 
 const PROTOCOL = "web+eaas-proxy";
 
@@ -39,7 +39,39 @@ const resolveName = async (dstAddr, nic) => {
 
 (async () => {
   console.log(`Version: ${await identify()}`);
-  if (process.argv.length < 3) {
+
+  const paramsOrig = process.argv.slice(2);
+  let params = paramsOrig;
+
+  try {
+    const {
+        issuer,
+        client_id,
+        username,
+        password,
+        eaasBackendURL,
+        networkId,
+        networkName,
+        networkLabel,
+        localIP,
+        localPort,
+    } = JSON.parse(await readFile("./eaas-proxy.json"));
+    const proxyURL = await connectToNetwork({
+        issuer,
+        client_id,
+        username,
+        password,
+        eaasBackendURL,
+        networkId,
+        networkName,
+        networkLabel,
+        localIP,
+        localPort,
+    });
+    params[0] = proxyURL;
+  } catch {}
+
+  if (params.length === 0) {
     if (process.platform === "win32") {
       await registerProtocol(PROTOCOL, process.argv[0]);
     }
@@ -52,9 +84,6 @@ const resolveName = async (dstAddr, nic) => {
     });
     return;
   }
-
-  const paramsOrig = process.argv.slice(2);
-  let params = paramsOrig;
 
   if (params[0].match(/https?:/)) {
     params[0] = await (await startEaas(params[0])).getProxyURL();
