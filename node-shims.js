@@ -45,3 +45,13 @@ globalThis.btoa = globalThis.btoa ?? ((string) => Buffer.from(string, "binary").
 
 import fetch from "node-fetch";
 globalThis.fetch = fetch;
+
+// HACK: Work around <https://github.com/emscripten-core/emscripten/issues/8542>.
+import {dirname} from "path";
+globalThis.__dirname = dirname(import.meta.url);
+
+import * as path from "path";
+import * as fs from "fs";
+globalThis.require = id => ({
+  fs, path
+})[id];
