@@ -17,7 +17,7 @@ copy . .
 # TODO: Move steps from package.json/prepublish to correct section.
 run npm install --unsafe-perm
 run git rev-parse HEAD
-run npm run build
-from ubuntu
-copy --from=0 /src/eaas-proxy.exe /src/eaas-proxy.app.zip /src/eaas-proxy /opt/eaas-proxy/
-cmd /opt/eaas-proxy/eaas-proxy
+# run npm run build
+from node:14
+copy --from=0 /src/ /opt/eaas-proxy/
+cmd /opt/eaas-proxy/eaas-proxy.js
