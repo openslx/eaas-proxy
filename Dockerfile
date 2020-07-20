@@ -1,4 +1,4 @@
-from node:10
+from node:14
 # gcc-multilib is needed for generating the 32-bit Windows binaries,
 # zip is needed to pack eaas-proxy.app.zip for macOS.
 run apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y gcc-multilib zip
