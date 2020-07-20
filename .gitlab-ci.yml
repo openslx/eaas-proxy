@@ -10,6 +10,10 @@ build:
   script:
   - docker build -t build .
   - docker run --rm -v "$(pwd)":/out build cp -R /opt/eaas-proxy/. /out/eaas-proxy
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  # - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" || true
+  - docker build --cache-from "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
+  - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
   artifacts:
     paths:
     - eaas-proxy/
