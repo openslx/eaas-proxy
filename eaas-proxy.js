@@ -22,6 +22,8 @@ import {startEaas} from "./lib/node-eaas-client.js";
 import identify from "./lib/identify-git";
 import fs from "fs";
 const {writeFile} = fs.promises;
+import terminalKit from "terminal-kit";
+const terminal = terminalKit.terminal;
 
 const PROTOCOL = "web+eaas-proxy";
 
@@ -40,6 +42,8 @@ const resolveName = async (dstAddr, nic) => {
 };
 
 (async () => {
+  terminal.drawImage("logo.png", {shrink: {width: 79, height: 100}});
+
   console.log(`Version: ${await identify()}`);
   if (process.argv.length < 3) {
     if (process.platform === "win32") {
