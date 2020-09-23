@@ -158,6 +158,16 @@ const dirname = path => {
     if (EAAS_PROXY_READY_PATH) await writeFile(EAAS_PROXY_READY_PATH, "");
   };
 
+  // HACK: Disable output
+  global.console = new Proxy(global.console, {
+    get(target, key, receiver) {
+      const ret = Reflect.get(target, key, receiver);
+      return new Proxy(ret, {
+        apply(target, thisArg, args) {},
+      });
+    },
+  });
+
   if (targetIPOrSOSCKS === "dhcpd") {
     console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
     ready();
