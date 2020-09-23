@@ -56,7 +56,9 @@ const dirname = path => {
 }
 
 (async () => {
-  terminal.drawImage(`${dirname()}/logo.png`, {shrink: {width: 79, height: 100}});
+  await terminal.drawImage(`${dirname()}/logo.png`, {
+    shrink: { width: 79, height: 100 },
+  });
 
   console.log(`Version: ${await identify()}`);
   if (process.argv.length < 3) {
