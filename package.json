@@ -28,7 +28,8 @@
   "pkg": {
     "assets": [
       "picotcp.wasm",
-      "logo.png"
+      "logo.png",
+      "node_modules/terminal-kit/"
     ],
     "targets": [
       "latest-win-x86",

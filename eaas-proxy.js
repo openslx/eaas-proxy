@@ -41,8 +41,22 @@ const resolveName = async (dstAddr, nic) => {
   return dstAddr;
 };
 
+const dirname = path => {
+  let url = import.meta.url;
+  url = url.replace(/^file:\/\//, "");
+  // HACK: Special case for Node.js on Windows
+  // (`url` will look like "file:///C:/...").
+  // Would properly use `require("url").fileURLToPath(url)`
+  // on all Node.js platforms, which is not avaible
+  // on older Node.js versions, though.
+  try {
+    if (process.platform === "win32") url = url.replace(/^\/+/, "");
+  } catch {}
+  return `${url}/..`;
+}
+
 (async () => {
-  terminal.drawImage("logo.png", {shrink: {width: 79, height: 100}});
+  terminal.drawImage(`${dirname()}/logo.png`, {shrink: {width: 79, height: 100}});
 
   console.log(`Version: ${await identify()}`);
   if (process.argv.length < 3) {
