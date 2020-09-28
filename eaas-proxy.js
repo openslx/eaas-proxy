@@ -130,6 +130,16 @@ const dirname = path => {
 
   const VDEPLUG = process.env.VDEPLUG && process.env.VDEPLUG.split(" ");
 
+  // HACK: Disable output
+  global.console = new Proxy(global.console, {
+    get(target, key, receiver) {
+      const ret = Reflect.get(target, key, receiver);
+      return new Proxy(ret, {
+        apply(target, thisArg, args) {},
+      });
+    },
+  });
+
   const nic = await new NIC;
   console.log("eaas-proxy's MAC address:",
     Array.from(nic.mac, v=>v.toString(16).padStart(2, 0)).join(":"));
@@ -159,16 +169,6 @@ const dirname = path => {
   const ready = async () => {
     if (EAAS_PROXY_READY_PATH) await writeFile(EAAS_PROXY_READY_PATH, "");
   };
-
-  // HACK: Disable output
-  global.console = new Proxy(global.console, {
-    get(target, key, receiver) {
-      const ret = Reflect.get(target, key, receiver);
-      return new Proxy(ret, {
-        apply(target, thisArg, args) {},
-      });
-    },
-  });
 
   if (targetIPOrSOSCKS === "dhcpd") {
     console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
