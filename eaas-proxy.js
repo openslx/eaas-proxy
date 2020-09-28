@@ -109,8 +109,24 @@ const dirname = path => {
   ] = params;
 
   // DEBUG
-  console.log(params);
+  // console.log(params);
   process.stdin.read();
+
+  console.log();
+  console.log(`Machine IP address: ${targetIPOrSOSCKS}`);
+  console.log(`Machine port mapped: ${targetPortString}`);
+  console.log(`Mapped to: ${externalIPPortString}`);
+  console.log();
+
+  // HACK: Disable output
+  global.console = new Proxy(global.console, {
+    get(target, key, receiver) {
+      const ret = Reflect.get(target, key, receiver);
+      return new Proxy(ret, {
+        apply(target, thisArg, args) {},
+      });
+    },
+  });
 
   const useWS = !!wsURLorSocketname.match(/^(ws:|wss:)\/\//);
   if (useWS) console.error("Using WebSocket.");
@@ -129,16 +145,6 @@ const dirname = path => {
   const targetPort = parseInt(targetPortString);
 
   const VDEPLUG = process.env.VDEPLUG && process.env.VDEPLUG.split(" ");
-
-  // HACK: Disable output
-  global.console = new Proxy(global.console, {
-    get(target, key, receiver) {
-      const ret = Reflect.get(target, key, receiver);
-      return new Proxy(ret, {
-        apply(target, thisArg, args) {},
-      });
-    },
-  });
 
   const nic = await new NIC;
   console.log("eaas-proxy's MAC address:",
