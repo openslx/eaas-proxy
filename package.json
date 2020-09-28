@@ -9,6 +9,7 @@
     "jsdom": "^13.0.0",
     "node-fetch": "^2.3.0",
     "opn": "^5.4.0",
+    "rcedit": "^2.2.0",
     "terminal-kit": "^1.43.0",
     "text-encoding": "git+https://github.com/inexorabletash/text-encoding.git",
     "vblob": "^1.0.2",

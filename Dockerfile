@@ -1,7 +1,7 @@
 from node:10
 # gcc-multilib is needed for generating the 32-bit Windows binaries,
 # zip is needed to pack eaas-proxy.app.zip for macOS.
-run apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y gcc-multilib zip
+run apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y gcc-multilib zip imagemagick wine
 workdir /src
 copy package.json .
 copy package-lock.json .
@@ -14,6 +14,7 @@ run \
   node_modules/.bin/pkg-fetch latest macos x64 && \
   :
 copy . .
+run for bin in ~/.pkg-cache/*/*-win-*; do node --experimental-modules ./change-icon.mjs "$bin"; done
 # TODO: Move steps from package.json/prepublish to correct section.
 run npm install --unsafe-perm
 run git rev-parse HEAD
