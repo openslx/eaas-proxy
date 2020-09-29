@@ -113,7 +113,7 @@ const dirname = path => {
   process.stdin.read();
 
   console.log();
-  console.log(`Machine IP address: ${targetIPOrSOSCKS}`);
+  console.log(`Machine address: ${targetIPOrSOSCKS}`);
   console.log(`Machine port mapped: ${targetPortString}`);
   console.log(`Mapped to: ${externalIPPortString}`);
   console.log();
