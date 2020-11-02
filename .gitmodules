@@ -1,6 +1,7 @@
 [submodule "eaas-client"]
 	path = eaas-client
 	url = https://gitlab.com/emulation-as-a-service/eaas-client/
+	branch = network-rework
 [submodule "picotcp"]
 	path = picotcp.js
 	url = https://gitlab.com/emulation-as-a-service/picotcp.js
