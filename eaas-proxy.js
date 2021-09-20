@@ -79,34 +79,68 @@ const resolveName = async (dstAddr, nic) => {
   // HACK: Get rid of `window` for Emscripten to work properly.
   delete global.window;
 
-  const [
-    externalIPPortString,
-    wsURLorSocketname,
-    MACString,
-    internalIPCIDR,
-    targetIPOrSOSCKS,
-    targetPortString,
-  ] = params;
-
   // DEBUG
   console.log(params);
   process.stdin.read();
 
-  const useWS = !!wsURLorSocketname.match(/^(ws:|wss:)\/\//);
-  if (useWS) console.error("Using WebSocket.");
+  let params2;
+  if (Array.isArray((params))) {
+    const [
+      externalIPPortString,
+      wsURLorSocketname,
+      MACString,
+      internalIPCIDR,
+      targetIPOrSOSCKS,
+      targetPortString,
+    ] = params;
 
-  const [scheme, username, password] = targetIPOrSOSCKS.split(/:/g);
+    const useWS = !!wsURLorSocketname.match(/^(ws:|wss:)\/\//);
+    if (useWS) console.error("Using WebSocket.");
 
-  const useSOCKS5 = scheme === "socks5";
-  if (useSOCKS5) console.error("Using SOCKS5.");
+    const [scheme, username, password] = targetIPOrSOSCKS.split(/:/g);
 
-  const [externalIP, externalPortString] =
-    externalIPPortString.includes(":") ? externalIPPortString.split(/:/) : ["", externalIPPortString];
-  const externalPort = parseInt(externalPortString);
+    const useSOCKS5 = scheme === "socks5";
+    if (useSOCKS5) console.error("Using SOCKS5.");
+
+    const [externalIP, externalPortString] =
+      externalIPPortString.includes(":") ? externalIPPortString.split(/:/) : ["", externalIPPortString];
+    const externalPort = parseInt(externalPortString);
+    const targetPort = parseInt(targetPortString);
+
+    params2 = {
+      ...(useWS ? {networkUrl: wsURLorSocketname} : {networkPath: wsURLorSocketname}),
+      macAddress: MACString,
+      ipAddress: internalIPCIDR,
+      mappings: [
+        targetIPOrSOSCKS === "dhcpd" ? {
+          service: "dhcpd",
+        } : useSOCKS5 ? {
+          srcAddress: externalIP,
+          srcPort: externalPort,
+          service: "socks5",
+          username,
+          password
+        } :
+        {
+          srcAddress: externalIP,
+          srcPort: externalPort,
+          dstAddress: targetIPOrSOSCKS,
+          dstPort: targetPort,
+        }
+      ]
+    };
+  } else {
+    params2 = params;
+  }
+
+  const {
+    macAddress: MACString,
+    ipAddress: internalIPCIDR
+  } = params2;
+
   const MAC = parseMAC(MACString); // TODO: Actually use this MAC, use random MAC if missing/empty string
   const useDHCP = internalIPCIDR === "dhcp";
   const [internalIP, subnet] = cidrToSubnet(internalIPCIDR);
-  const targetPort = parseInt(targetPortString);
 
   const VDEPLUG = process.env.VDEPLUG && process.env.VDEPLUG.split(" ");
 
@@ -127,8 +161,8 @@ const resolveName = async (dstAddr, nic) => {
     let chain = nic.readable;
     if (DEBUG_RECORD_TRAFFIC) chain = chain.pipeThrough(sendStream);
     chain = chain.pipeThrough(makeVDEGenerator())
-    .pipeThrough(useWS ? makeWSStream(wsURLorSocketname)
-      : vdePlugStream(wsURLorSocketname, VDEPLUG))
+    .pipeThrough(params2.networkPath ? makeWSStream(params2.networkPath)
+      : vdePlugStream(params2.networkUrl, VDEPLUG))
     .pipeThrough(new VDEParser());
     if (DEBUG_RECORD_TRAFFIC) chain = chain.pipeThrough(receiveStream);
     chain = chain.pipeThrough(nic);
@@ -140,48 +174,50 @@ const resolveName = async (dstAddr, nic) => {
     if (EAAS_PROXY_READY_PATH) await writeFile(EAAS_PROXY_READY_PATH, "");
   };
 
-  if (targetIPOrSOSCKS === "dhcpd") {
-    console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
-    ready();
-  } else if (useSOCKS5) {
-    socks.createServer(async (info, accept, deny) => {
-      console.log(info);
-      const dstIP = await resolveName(info.dstAddr, nic);
-      // Fail if address could not be resolved by DNS
-      // HACK: `deny()` sends the wrong SOCKS5 reply
-      // (and Wireshark is not happy about the general structure of the reply),
-      // it might be smarter to `accept(true)` and directly close the socket?
-      if (!dstIP) return deny();
-      const c = accept(true);
-      const socket1 = {
-        readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
-        writable: wrapWritable(c),
-      }
-      const socket2 = new nic.TCPSocket(dstIP, info.dstPort);
-      socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
-    }).useAuth(username ?
-      socks.auth.UserPassword((_username, _password, accept) =>
-        accept(_username === username && _password === password)) :
-      socks.auth.None()).listen(externalPort, ready);
-  } else {
-    net.createServer(async (c) => {
-      const socket1 = {
-        readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
-        writable: wrapWritable(c),
-      };
-      const dstIP = await resolveName(targetIPOrSOSCKS, nic);
-      // Fail if address could not be resolved by DNS
-      if (!dstIP) {
-        try {
-          socket1.readable.cancel();
-        } catch {}
-        try {
-          socket1.writable.abort();
-        } catch {}
-        return;
-      }
-      const socket2 = new nic.TCPSocket(dstIP, targetPort);
-      socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
-    }).listen(externalPort, ...(externalIP ? [externalIP] : []), ready);
+  for (const {service, srcAddress, srcPort, dstAddr, dstPort, username, password} of params2.mappings) {
+    if (service === "dhcpd") {
+      console.log("Starting DHCP server:", nic.startDHCPServer(internalIP));
+      ready();
+    } else if (service === "socks5") {
+      socks.createServer(async (info, accept, deny) => {
+        console.log(info);
+        const dstIP = await resolveName(info.dstAddr, nic);
+        // Fail if address could not be resolved by DNS
+        // HACK: `deny()` sends the wrong SOCKS5 reply
+        // (and Wireshark is not happy about the general structure of the reply),
+        // it might be smarter to `accept(true)` and directly close the socket?
+        if (!dstIP) return deny();
+        const c = accept(true);
+        const socket1 = {
+          readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
+          writable: wrapWritable(c),
+        }
+        const socket2 = new nic.TCPSocket(dstIP, info.dstPort);
+        socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
+      }).useAuth(username ?
+        socks.auth.UserPassword((_username, _password, accept) =>
+          accept(_username === username && _password === password)) :
+        socks.auth.None()).listen(srcPort, ready);
+    } else {
+      net.createServer(async (c) => {
+        const socket1 = {
+          readable: iteratorStream(c).pipeThrough(transformToUint8Array()),
+          writable: wrapWritable(c),
+        };
+        const dstIP = await resolveName(dstAddr, nic);
+        // Fail if address could not be resolved by DNS
+        if (!dstIP) {
+          try {
+            socket1.readable.cancel();
+          } catch {}
+          try {
+            socket1.writable.abort();
+          } catch {}
+          return;
+        }
+        const socket2 = new nic.TCPSocket(dstIP, dstPort);
+        socket1.readable.pipeThrough(socket2).pipeThrough(socket1);
+      }).listen(srcPort, ...(srcAddress ? [srcAddress] : []), ready);
+    }
   }
 })().catch(console.log);
