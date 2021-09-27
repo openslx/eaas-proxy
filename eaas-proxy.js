@@ -115,17 +115,18 @@ const resolveName = async (dstAddr, nic) => {
         targetIPOrSOSCKS === "dhcpd" ? {
           service: "dhcpd",
         } : useSOCKS5 ? {
-          srcAddress: externalIP,
-          srcPort: externalPort,
           service: "socks5",
+          externalIp: externalIP,
+          externalPort: externalPort,
           username,
           password
         } :
         {
-          srcAddress: externalIP,
-          srcPort: externalPort,
-          dstAddress: targetIPOrSOSCKS,
-          dstPort: targetPort,
+          service: "tcp",
+          externalIp: externalIP,
+          externalPort: externalPort,
+          target: targetIPOrSOSCKS,
+          targetPort: targetPort,
         }
       ]
     };
