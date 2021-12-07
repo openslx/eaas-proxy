@@ -1,5 +1,6 @@
 {
   "name": "eaas-proxy",
+  "type": "module",
   "version": "",
   "dependencies": {
     "@heroku/socksv5": "0.0.9",

@@ -1,6 +1,14 @@
 // Copyright 2018 The Emulation-as-a-Service Authors.
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+import process from "process";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+// HACK: __dirname and require will be (globally) relative to THIS file
+global.__dirname = new URL(".", import.meta.url).pathname;
+global.require = require;
+
 process.on("uncaughtException", console.error);
 process.on("unhandledRejection", console.error);
 setInterval = new Proxy(setInterval, {
