@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Copyright 2018 The Emulation-as-a-Service Authors.
 // SPDX-License-Identifier: GPL-2.0-or-later
 
