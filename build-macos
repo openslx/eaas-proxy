@@ -5,7 +5,7 @@ set -eu
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 TARGET="eaas-proxy.app"
-APP="eaas-proxy-macos-x64"
+APP="eaas-proxy-macos"
 TARGETAPP="eaas-proxy"
 PROTOCOL="web+eaas-proxy"
 NAME="EaaS Proxy"
